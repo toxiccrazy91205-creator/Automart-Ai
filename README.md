@@ -29,6 +29,7 @@
 ## 🔍 Overview
 
 Supermarket AI is built around three core pillars:
+https://automart-ai-mpworqt3pcf76dsgxam9bl.streamlit.app/
 
 | Pillar | Description |
 |--------|-------------|
@@ -313,5 +314,6 @@ The system works out of the box without any configuration. The only optional set
 - **Error isolation** — Every step in `main.py` is wrapped in `try/except` so a single model failure doesn't crash the entire pipeline.
 
 ---
+
 
 *Built with ❤️ using Python, PyTorch, and Streamlit*
