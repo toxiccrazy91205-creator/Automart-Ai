@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}Sales & Inventory - Supermarket AI{% endblock %}
+{% block content %}
+<div class="page-title">📊 Sales & Inventory</div>
+<div class="page-subtitle">Track revenue, stock levels, and demand trends</div>
+
+{% if error %}
+<div class="alert alert-error">❌ {{ error }}</div>
+{% endif %}
+
+<div class="metrics-row">
+    <div class="metric-card">
+        <div class="label">Total Profit</div>
+        <div class="value">{{ total_profit_display }}</div>
+    </div>
+    <div class="metric-card">
+        <div class="label">Top Products</div>
+        <div class="value">{{ top_products_count }}</div>
+    </div>
+    <div class="metric-card">
+        <div class="label">Low Stock Items</div>
+        <div class="value">{{ low_stock_count }}</div>
+        {% if low_stock_count > 0 %}<div class="delta">needs restock</div>{% endif %}
+    </div>
+    <div class="metric-card">
+        <div class="label">Festival Demand Items</div>
+        <div class="value">{{ festival_count }}</div>
+    </div>
+</div>
+
+<div class="section-header">📈 Daily Sales Trend</div>
+<div class="chart-container">
+    <div id="sales-chart" style="height:400px;"></div>
+</div>
+
+<div class="two-col">
+    <div>
+        <div class="section-header">💰 Top Profitable Products</div>
+        <div id="profit-chart" style="height:400px;"></div>
+        {% if has_loss %}
+        <span class="badge-loss">⚠ Loss-Making Products Detected</span>
+        <table class="data-table">
+            <thead>
+                <tr><th>Product</th><th>Loss (₹)</th></tr>
+            </thead>
+            <tbody>
+                {% for item in loss_products %}
+                <tr><td>{{ item.Product }}</td><td>{{ item.Loss }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+    <div>
+        <div class="section-header">📦 Inventory Status</div>
+        {% if has_low_stock %}
+        <span class="badge-warning">🔴 Low Stock Alert</span>
+        <table class="data-table">
+            <thead>
+                <tr><th>Product</th><th>Current Stock</th><th>Restock Qty</th></tr>
+            </thead>
+            <tbody>
+                {% for item in low_stock_items %}
+                <tr><td>{{ item.Product }}</td><td>{{ item.Current_Stock }}</td><td>{{ item.Restock_Qty }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-success">✅ All products adequately stocked</div>
+        {% endif %}
+        <div class="section-header">🎉 Festival Top Products</div>
+        <div id="festival-chart" style="height:400px;"></div>
+    </div>
+</div>
+
+<div class="section-header">🧠 AI Inventory Insights</div>
+{% for insight in inventory_insights %}
+<div class="insight-pill">💡 {{ insight }}</div>
+{% endfor %}
+
+{% endblock %}
+{% block scripts %}
+<script>
+const salesDates = {{ sales_dates|safe }};
+const salesValues = {{ sales_values|safe }};
+const topProducts = {{ top_products|safe }};
+const festivalProducts = {{ festival_products|safe }};
+
+Plotly.newPlot('sales-chart', [{
+    x: salesDates,
+    y: salesValues,
+    type: 'scatter',
+    fill: 'tozeroy',
+    fillcolor: 'rgba(92,107,192,0.15)',
+    line: {color: '#5c6bc0', width: 2}
+}], {
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    margin: {l: 0, r: 0, t: 10, b: 0},
+    xaxis: {gridcolor: '#2e3450'},
+    yaxis: {gridcolor: '#2e3450', title: 'Units Sold'},
+    hovermode: 'x unified'
+});
+
+Plotly.newPlot('profit-chart', [{
+    y: topProducts.map(p => p.Product),
+    x: topProducts.map(p => p.Profit),
+    type: 'bar',
+    orientation: 'h',
+    marker: {color: topProducts.map(p => p.Profit), colorscale: 'Blues'}
+}], {
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    margin: {l: 0, r: 0, t: 10, b: 0},
+    yaxis: {categoryorder: 'total ascending'},
+    xaxis: {gridcolor: '#2e3450', title: 'Profit'},
+    coloraxis: {showscale: false}
+});
+
+Plotly.newPlot('festival-chart', [{
+    x: festivalProducts.map(p => p.Product),
+    y: festivalProducts.map(p => p['Units Sold']),
+    type: 'bar',
+    marker: {color: festivalProducts.map(p => p['Units Sold']), colorscale: 'Oranges'}
+}], {
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    margin: {l: 0, r: 0, t: 10, b: 0},
+    xaxis: {gridcolor: '#2e3450', title: 'Product'},
+    yaxis: {gridcolor: '#2e3450', title: 'Units Sold'},
+    coloraxis: {showscale: false}
+});
+</script>
+{% endblock %}

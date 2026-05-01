@@ -1,0 +1,31 @@
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <h2>🛒 Supermarket AI</h2>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/" class="nav-item {% if request.path == '/' %}active{% endif %}">📊 Sales & Inventory</a>
+        <a href="/customers/" class="nav-item {% if request.path == '/customers/' %}active{% endif %}">👥 Customers & Recommendations</a>
+        <a href="/forecasting/" class="nav-item {% if request.path == '/forecasting/' %}active{% endif %}">🔮 Forecasting</a>
+    </nav>
+    <div class="sidebar-stats">
+        <h3>📌 Quick Stats</h3>
+        <div class="stat-item">
+            <span class="stat-label">📦 Products:</span>
+            <span class="stat-value">{{ total_products }}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">👥 Customers:</span>
+            <span class="stat-value">{{ total_customers }}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">📅 Date Range:</span>
+            <span class="stat-value">{{ date_min }} → {{ date_max }}</span>
+        </div>
+        <div class="stat-item">
+            <span class="{{ profit_badge }}">{{ profit_status }}</span>
+        </div>
+    </div>
+    <div class="sidebar-footer">
+        <a href="/?refresh=1" class="btn-refresh">🔄 Refresh Data</a>
+    </div>
+</aside>

@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% block title %}Customers & Recommendations - Supermarket AI{% endblock %}
+{% block content %}
+<div class="page-title">👥 Customers & Recommendations</div>
+<div class="page-subtitle">Understand customer segments and drive cross-selling</div>
+
+{% if error %}
+<div class="alert alert-error">❌ {{ error }}</div>
+{% endif %}
+
+<div class="metrics-row">
+    {% for seg in segment_data %}
+    <div class="metric-card">
+        <div class="label">{{ seg.name }} Customers</div>
+        <div class="value">{{ seg.count }}</div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="two-col">
+    <div>
+        <div class="section-header">👥 Customer Segments</div>
+        <div id="segment-chart" style="height:400px;"></div>
+
+        <div class="section-header">📋 Customer Table</div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    {% for col in customer_columns %}
+                    <th>{{ col }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in customer_rows %}
+                <tr>
+                    {% for val in row %}
+                    <td>{{ val }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <div class="section-header">🎯 High vs Low Value Customers</div>
+        <div class="tabs">
+            <div class="tab active" data-target="high-value">⭐ High Value</div>
+            <div class="tab" data-target="low-value">📉 Low Value</div>
+        </div>
+        <div id="high-value" class="tab-content active">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        {% for col in high_value_columns %}
+                        <th>{{ col }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in high_value_rows %}
+                    <tr>
+                        {% for val in row %}
+                        <td>{{ val }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="low-value" class="tab-content">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        {% for col in low_value_columns %}
+                        <th>{{ col }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in low_value_rows %}
+                    <tr>
+                        {% for val in row %}
+                        <td>{{ val }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section-header">🧠 Marketing Insights</div>
+        {% for insight in customer_insights %}
+        <div class="insight-pill">💡 {{ insight }}</div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="section-header">🛒 Product Recommendations (Association Rules)</div>
+{% if has_rules %}
+<div class="two-col">
+    <div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Antecedents</th>
+                    <th>Consequents</th>
+                    <th>Lift</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rule in top_rules %}
+                <tr>
+                    <td>{{ rule.antecedents }}</td>
+                    <td>{{ rule.consequents }}</td>
+                    <td>{{ rule.lift }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <div><strong>How to read this:</strong></div>
+        <div style="font-size:13px;color:#8b93b0;margin-top:8px;">
+            <div><strong>Antecedents</strong> → products the customer already has</div>
+            <div><strong>Consequents</strong> → products to recommend</div>
+            <div><strong>Lift > 1</strong> → genuine association (not random)</div>
+            <div>Higher lift = stronger recommendation</div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">No association rules generated yet. Try lowering min_support in the Apriori model.</div>
+{% endif %}
+
+<div class="section-header">🧠 Recommendation Insights</div>
+{% for insight in rec_insights %}
+<div class="insight-pill">💡 {{ insight }}</div>
+{% endfor %}
+
+{% endblock %}
+{% block scripts %}
+<script>
+const segmentLabels = {{ segment_labels|safe }};
+const segmentCounts = {{ segment_counts|safe }};
+const colors = {'High Value': '#66bb6a', 'Medium Value': '#ffa726', 'Low Value': '#ef5350'};
+
+Plotly.newPlot('segment-chart', [{
+    labels: segmentLabels,
+    values: segmentCounts,
+    type: 'pie',
+    hole: 0.45,
+    marker: {
+        colors: segmentLabels.map(l => colors[l] || '#5c6bc0')
+    }
+}], {
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    margin: {l: 0, r: 0, t: 10, b: 0}
+});
+</script>
+{% endblock %}

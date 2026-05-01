@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Sales Forecasting - Supermarket AI{% endblock %}
+{% block content %}
+<div class="page-title">🔮 Sales Forecasting</div>
+<div class="page-subtitle">LSTM neural network predicts next-day total sales</div>
+
+{% if error %}
+<div class="alert alert-error">❌ {{ error }}</div>
+{% endif %}
+
+<div class="section-header">📈 Recent Sales (Last 30 Days)</div>
+<div class="chart-container">
+    <div id="recent-chart" style="height:400px;"></div>
+</div>
+
+<div class="metrics-row">
+    <div class="metric-card">
+        <div class="label">7-Day Avg Sales</div>
+        <div class="value">{{ avg_7 }} units</div>
+    </div>
+    <div class="metric-card">
+        <div class="label">30-Day Avg Sales</div>
+        <div class="value">{{ avg_30 }} units</div>
+    </div>
+</div>
+
+<hr style="border-color:#2e3450;margin:20px 0;">
+<div class="section-header">🤖 LSTM Prediction</div>
+<div class="alert alert-info">ℹ️ The model trains on your full sales history each time. This may take 10–30 seconds.</div>
+
+<div class="two-col">
+    <div>
+        <button id="lstm-btn" class="btn-primary">▶ Run LSTM Prediction</button>
+    </div>
+    <div id="lstm-result">
+        {% if has_prediction %}
+        <div class="alert alert-success">✅ Prediction complete in {{ prediction_time }}s</div>
+        <div class="metric-card">
+            <div class="label">Predicted Next-Day Sales</div>
+            <div class="value">{{ prediction }} units</div>
+        </div>
+        <div style="font-size:14px;color:#8b93b0;margin-top:10px;">
+            📊 That's <strong>{{ pred_diff }} units {{ pred_direction }}</strong> the daily average ({{ daily_avg }} units)
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+const recentDates = {{ recent_dates|safe }};
+const recentValues = {{ recent_values|safe }};
+
+Plotly.newPlot('recent-chart', [{
+    x: recentDates,
+    y: recentValues,
+    type: 'scatter',
+    mode: 'lines+markers',
+    line: {color: '#42a5f5', width: 2},
+    marker: {color: '#42a5f5'}
+}], {
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    margin: {l: 0, r: 0, t: 10, b: 0},
+    xaxis: {gridcolor: '#2e3450'},
+    yaxis: {gridcolor: '#2e3450', title: 'Units Sold'}
+});
+</script>
+{% endblock %}
